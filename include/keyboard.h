@@ -39,7 +39,8 @@ enum {
 	Kesc=	0x1b,
 	Keof=	0x04,
 
-	Kcmd=	0xF100	/* Rune: beginning of Cmd+'a', Cmd+'A', etc on Mac */
+	Kcmd=	0xF100,	/* Rune: beginning of Cmd+'a', Cmd+'A', etc on Mac */
+	Kmod=	0xF200	/* Rune: beginning of special keys with modifiers, see devdraw(1) */
 };
 
 #if defined(__cplusplus)

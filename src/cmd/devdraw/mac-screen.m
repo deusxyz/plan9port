@@ -21,6 +21,7 @@
 #include <keyboard.h>
 #include <drawfcall.h>
 #include "devdraw.h"
+#include "modkeys.h"
 #include "bigarrow.h"
 #include "glendapng.h"
 
@@ -927,6 +928,7 @@ rpc_setmouse(Client *c, Point p)
 	NSEvent *e;
 	NSEventModifierFlags m;
 	uint c, k;
+	int mods;
 
 	LOG(@"doCommandBySelector (%@)", NSStringFromSelector(s));
 
@@ -935,6 +937,26 @@ rpc_setmouse(Client *c, Point p)
 	k = keycvt(c);
 	LOG(@"keyDown: character0: 0x%x -> 0x%x", c, k);
 	m = [e modifierFlags];
+
+	if(modkeysenabled()){
+		mods = 0;
+		if(m & NSEventModifierFlagShift)
+			mods |= Kmodshift;
+		if(m & NSEventModifierFlagControl)
+			mods |= Kmodctl;
+		if(m & NSEventModifierFlagOption)
+			mods |= Kmodalt;
+		if(m & NSEventModifierFlagCommand)
+			mods |= Kmodcmd;
+		if(c == 0x19){	/* Shift+Tab arrives as NSBackTabCharacter */
+			k = '\t';
+			mods |= Kmodshift;
+		}
+		if(mods != 0 && modkeyindex(k) != 0){
+			gfx_keystroke(self.client, modkey(k, mods));
+			return;
+		}
+	}
 
 	if(m & NSEventModifierFlagCommand){
 		if((m & NSEventModifierFlagShift) && 'a' <= k && k <= 'z')

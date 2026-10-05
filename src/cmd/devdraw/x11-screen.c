@@ -12,6 +12,7 @@
 #include <thread.h>
 #include "x11-memdraw.h"
 #include "devdraw.h"
+#include "modkeys.h"
 #include "bigarrow.h"
 
 #undef time
@@ -1283,6 +1284,9 @@ _xtoplan9kbd(XEvent *e)
 		case XK_Return:
 			k = '\n';
 			break;
+		case XK_ISO_Left_Tab:	/* Shift+Tab */
+			k = '\t';
+			break;
 		case XK_Alt_L:
 		case XK_Meta_L:	/* Shift Alt on PCs */
 		case XK_Alt_R:
@@ -1300,6 +1304,19 @@ _xtoplan9kbd(XEvent *e)
 	/* Compensate for servers that call a minus a hyphen */
 	if(k == XK_hyphen)
 		k = XK_minus;
+	if(modkeysenabled()){
+		int mods = 0;
+		if(e->xkey.state&ShiftMask)
+			mods |= Kmodshift;
+		if(e->xkey.state&ControlMask)
+			mods |= Kmodctl;
+		if(e->xkey.state&Mod1Mask)
+			mods |= Kmodalt;
+		if(e->xkey.state&Mod4Mask)
+			mods |= Kmodcmd;
+		if(mods != 0 && modkeyindex(k) != 0)
+			return modkey(k, mods);
+	}
 	/* Do control mapping ourselves if translator doesn't */
 	if(e->xkey.state&ControlMask)
 		k &= 0x9f;
